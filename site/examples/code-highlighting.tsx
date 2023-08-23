@@ -360,6 +360,8 @@ declare module 'slate' {
   },
 ]
 
+console.log('===tag initialValue', initialValue)
+
 // Prismjs theme stored as a string instead of emotion css function.
 // It is useful for copy/pasting different themes. Also lets keeping simpler Leaf implementation
 // In the real project better to use just css file
