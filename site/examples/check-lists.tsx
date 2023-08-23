@@ -21,7 +21,7 @@ import { withHistory } from 'slate-history'
 
 const initialValue: Descendant[] = [
   {
-    type: 'paragraph',
+    type: 'paragraph', // path: 0
     children: [
       {
         text:
@@ -30,37 +30,37 @@ const initialValue: Descendant[] = [
     ],
   },
   {
-    type: 'check-list-item',
+    type: 'check-list-item', // path: 1
     checked: true,
     children: [{ text: 'Slide to the left.' }],
   },
   {
-    type: 'check-list-item',
+    type: 'check-list-item', // path: 2
     checked: true,
     children: [{ text: 'Slide to the right.' }],
   },
   {
-    type: 'check-list-item',
+    type: 'check-list-item', // path: 3
     checked: false,
     children: [{ text: 'Criss-cross.' }],
   },
   {
-    type: 'check-list-item',
+    type: 'check-list-item', // path: 4
     checked: true,
     children: [{ text: 'Criss-cross!' }],
   },
   {
-    type: 'check-list-item',
+    type: 'check-list-item', // path: 5
     checked: false,
     children: [{ text: 'Cha cha real smooth…' }],
   },
   {
-    type: 'check-list-item',
+    type: 'check-list-item', // path: 6
     checked: false,
     children: [{ text: "Let's go to work!" }],
   },
   {
-    type: 'paragraph',
+    type: 'paragraph', // path: 7
     children: [{ text: 'Try it out for yourself!' }],
   },
 ]
@@ -86,7 +86,8 @@ const CheckListsExample = () => {
 
 const withChecklists = editor => {
   const { deleteBackward } = editor
-
+  // 总之，这段代码的作用是，当光标位于一个待办事项（check-list-item）的开头时，按下删除键时将该待办事项转换为段落。
+  // 这样，可以在编辑待办事项的内容时，按下删除键一次即可删除整个待办事项而不是删除其中的文本。
   editor.deleteBackward = (...args) => {
     const { selection } = editor
 
@@ -100,9 +101,11 @@ const withChecklists = editor => {
 
       if (match) {
         const [, path] = match
+        console.log('===tag match', match)
         const start = Editor.start(editor, path)
-
+        console.log('===tag start', start)
         if (Point.equals(selection.anchor, start)) {
+          debugger
           const newProperties: Partial<SlateElement> = {
             type: 'paragraph',
           }
@@ -161,6 +164,7 @@ const CheckListItemElement = ({ attributes, children, element }) => {
           type="checkbox"
           checked={checked}
           onChange={event => {
+            console.log('===tag element', element)
             const path = ReactEditor.findPath(editor, element)
             const newProperties: Partial<SlateElement> = {
               checked: event.target.checked,
