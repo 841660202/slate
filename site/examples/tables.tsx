@@ -26,7 +26,13 @@ const TablesExample = () => {
 
 const withTables = editor => {
   const { deleteBackward, deleteForward, insertBreak } = editor
+  // 在 Slate 编辑器中，`editor.deleteBackward` 和 `editor.deleteForward` 是两个不同的函数，用于处理删除操作。它们之间的区别在于删除的方向：
 
+  // 1. `editor.deleteBackward`：这个函数用于处理从当前光标位置向前删除的操作。通常用于 Backspace 键或 Delete 键的操作。例如，当你按下 Backspace 键时，它会删除光标前面的内容。
+
+  // 2. `editor.deleteForward`：这个函数用于处理从当前光标位置向后删除的操作。通常用于 Delete 键的操作。例如，当你按下 Delete 键时，它会删除光标后面的内容。
+
+  // 这两个函数可以在 Slate 编辑器中进行自定义以实现不同的删除行为。你可以根据特定的需求重写它们，以实现编辑器中的特定删除逻辑。
   editor.deleteBackward = unit => {
     const { selection } = editor
 
@@ -50,7 +56,20 @@ const withTables = editor => {
 
     deleteBackward(unit)
   }
+  // 这段代码的作用是在特定情况下，当焦点位于单元格的末尾时，阻止了向前删除操作的执行
 
+  //   这段代码看起来是在 Slate 编辑器中重写了 `editor.deleteForward` 函数，以实现一些特定的删除行为。代码的逻辑如下：
+
+  // 1. 获取当前编辑器的选区信息 `selection`。
+  // 2. 如果选区存在并且是一个折叠选区（collapsed selection），则继续下面的处理。
+  // 3. 使用 `Editor.nodes` 函数来查找编辑器中的块元素，匹配类型为 `'table-cell'` 的单元格元素（`table-cell` 可能是你的自定义块类型）。
+  // 4. 如果找到了单元格元素（`cell`），获取其路径 `cellPath`。
+  // 5. 使用 `Editor.end` 函数来获取单元格的结束位置。
+  // 6. 检查选区的锚点是否与单元格的结束位置相同，如果是，则返回，即不执行删除操作。
+
+  // 总体来说，这段代码的作用是在特定情况下，当焦点位于单元格的末尾时，阻止了向前删除操作的执行。
+  // 在单元格中的时候，当鼠标变成一个光标点时候，不进行删除
+  // 如果有任何其他问题或需要更多解释，请随时问我。
   editor.deleteForward = unit => {
     const { selection } = editor
 

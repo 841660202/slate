@@ -157,3 +157,7 @@ Slate's codebase is monorepo managed with [Lerna](https://lerna.js.org/). It con
 All contributions are super welcome! Check out the [Contributing instructions](https://docs.slatejs.org/general/contributing) for more info!
 
 Slate is [MIT-licensed](./License.md).
+
+### Node 版本 有要求
+
+本地正常环境 17.9.1

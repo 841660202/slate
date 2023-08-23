@@ -194,7 +194,17 @@ const unwrapButton = editor => {
       !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === 'button',
   })
 }
+// 这段代码实现了在 Slate 编辑器中添加链接的功能。具体来说，`wrapLink` 函数接受一个编辑器实例和一个链接的 URL 作为参数，然后执行以下步骤：
 
+// 1. 检查是否已经存在活动的链接（即光标处于链接内）。如果存在，先解除链接。
+// 2. 获取编辑器的当前选区（selection）。
+// 3. 检查选区是否是折叠状态（即光标处于一个点上，没有选中文本）。
+// 4. 创建一个链接元素（LinkElement）对象，其中包括类型为 `'link'`，URL 为给定的 URL，以及一个包含链接文本的子节点（如果选区是折叠状态）。
+// 5. 根据选区的状态，执行以下操作：
+//    - 如果选区是折叠状态，使用 `Transforms.insertNodes` 将链接元素插入到当前光标位置。
+//    - 如果选区不是折叠状态，使用 `Transforms.wrapNodes` 将链接元素包裹在选区的范围内，并设置 `split: true` 以确保链接正确分割，然后使用 `Transforms.collapse` 将光标移动到链接后面。
+
+// 总之，`wrapLink` 函数用于在 Slate 编辑器中添加链接，无论是在选区中插入链接文本还是将已有文本包裹成链接。
 const wrapLink = (editor, url: string) => {
   if (isLinkActive(editor)) {
     unwrapLink(editor)
@@ -223,13 +233,17 @@ const wrapButton = editor => {
 
   const { selection } = editor
   const isCollapsed = selection && Range.isCollapsed(selection)
+
+  // 插入一个元素类型，并初始化默认展示
   const button: ButtonElement = {
     type: 'button',
     children: isCollapsed ? [{ text: 'Edit me!' }] : [],
   }
 
+  // 选中起止点重合
   if (isCollapsed) {
     Transforms.insertNodes(editor, button)
+    // 选中起止点不重合
   } else {
     Transforms.wrapNodes(editor, button, { split: true })
     Transforms.collapse(editor, { edge: 'end' })
@@ -245,6 +259,11 @@ const InlineChromiumBugfix = () => (
       font-size: 0;
     `}
   >
+    {/* `String.fromCodePoint(160)` 的结果是一个非断行空格字符。在 Unicode 中，编码点 160 对应于非断行空格（Non-Breaking Space），通常用于在排版中保持两个单词不会因为换行而断开，而仍然保持在同一行上。
+
+这个字符在 HTML 中可以表示为 `&nbsp;` 实体。在某些情况下，它可能被用于制造空间，使得元素在没有实际内容的情况下也能够被渲染出来。
+
+需要注意的是，这个字符与普通空格字符（编码点 32）在显示效果上有所不同，它不会被自动折叠成单个空格，而是会保持其原始的宽度。 */}
     {String.fromCodePoint(160) /* Non-breaking space */}
   </span>
 )

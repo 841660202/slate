@@ -72,6 +72,7 @@ const VideoElement = ({ attributes, children, element }) => {
             const newProperties: Partial<SlateElement> = {
               url: val,
             }
+            // 更新节点信息
             Transforms.setNodes<SlateElement>(editor, newProperties, {
               at: path,
             })

@@ -11,7 +11,7 @@ const PlainTextExample = () => {
     </Slate>
   )
 }
-
+// 类似textarea
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',

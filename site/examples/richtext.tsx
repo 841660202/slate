@@ -8,6 +8,7 @@ import {
   Descendant,
   Element as SlateElement,
 } from 'slate'
+// TODO: 实现原理是什么？
 import { withHistory } from 'slate-history'
 
 import { Button, Icon, Toolbar } from '../components'
@@ -51,6 +52,7 @@ const RichTextExample = () => {
         spellCheck
         autoFocus
         onKeyDown={event => {
+          // 前四种，存在快捷键
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, event as any)) {
               event.preventDefault()
@@ -71,7 +73,8 @@ const toggleBlock = (editor, format) => {
     TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
   )
   const isList = LIST_TYPES.includes(format)
-
+  // TODO: 这里的展开，与设置，并没有使用 Editor.withoutNormalizing，避免多个序列中间出现执行normalized，实现延迟执行
+  // https://docs.slatejs.org/concepts/11-normalizing#implications-for-other-code
   Transforms.unwrapNodes(editor, {
     match: n =>
       !Editor.isEditor(n) &&
@@ -80,7 +83,10 @@ const toggleBlock = (editor, format) => {
       !TEXT_ALIGN_TYPES.includes(format),
     split: true,
   })
+
   let newProperties: Partial<SlateElement>
+
+  // 对齐方式
   if (TEXT_ALIGN_TYPES.includes(format)) {
     newProperties = {
       align: isActive ? undefined : format,
@@ -90,28 +96,39 @@ const toggleBlock = (editor, format) => {
       type: isActive ? 'paragraph' : isList ? 'list-item' : format,
     }
   }
+
+  // 节点配置属性
   Transforms.setNodes<SlateElement>(editor, newProperties)
 
+  // 设置成块
   if (!isActive && isList) {
     const block = { type: format, children: [] }
     Transforms.wrapNodes(editor, block)
   }
 }
-
+// 切换标记
 const toggleMark = (editor, format) => {
+  // 存在该格式
   const isActive = isMarkActive(editor, format)
-
+  // 存在则移除
   if (isActive) {
     Editor.removeMark(editor, format)
   } else {
+    // 不存在则移除
     Editor.addMark(editor, format, true)
   }
 }
-
+// 判断
 const isBlockActive = (editor, format, blockType = 'type') => {
   const { selection } = editor
-  if (!selection) return false
+  console.log('selection', selection)
 
+  if (!selection) return false
+  // 将范围转换为非悬挂范围。
+  // “挂起”范围是由浏览器的“三次单击”选择行为创建的。当三次单击一个块时，浏览器选择从该块的开始到下一个块的开始。因此，该范围“挂起”到下一个块中。如果取消范围被赋予这样一个范围，它会向后移动末尾，直到它位于挂起块之前的非空文本节点中。
+  // 请注意，取消范围是为修复三次点击的块的特定目的而设计的，因此目前有许多警告：
+  // 它不会修改范围的开始；只有结束。例如，它不会“取消挂起”在前一个块末尾开始的选择。
+  // 它只在开始块被完全选中的情况下做任何事情。例如，它不处理通过双击段落末尾创建的范围（浏览器通过选择从该段落末尾到下一个段落的开头来处理）。
   const [match] = Array.from(
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
@@ -124,13 +141,20 @@ const isBlockActive = (editor, format, blockType = 'type') => {
 
   return !!match
 }
-
+// 判断
 const isMarkActive = (editor, format) => {
+  // 获取将在当前选择中添加到文本中的标记
   const marks = Editor.marks(editor)
   return marks ? marks[format] === true : false
 }
 
 const Element = ({ attributes, children, element }) => {
+  console.log('{ attributes, children, element }', {
+    attributes,
+    children,
+    element,
+  })
+  // 生成样式
   const style = { textAlign: element.align }
   switch (element.type) {
     case 'block-quote':
@@ -197,11 +221,12 @@ const Leaf = ({ attributes, children, leaf }) => {
 
   return <span {...attributes}>{children}</span>
 }
-
+// 后面的块元素
 const BlockButton = ({ format, icon }) => {
   const editor = useSlate()
   return (
     <Button
+      // 是否选中状态
       active={isBlockActive(
         editor,
         format,
@@ -209,6 +234,7 @@ const BlockButton = ({ format, icon }) => {
       )}
       onMouseDown={event => {
         event.preventDefault()
+        // 设置为某种块
         toggleBlock(editor, format)
       }}
     >
@@ -216,7 +242,7 @@ const BlockButton = ({ format, icon }) => {
     </Button>
   )
 }
-
+// 前四种
 const MarkButton = ({ format, icon }) => {
   const editor = useSlate()
   return (
@@ -226,6 +252,7 @@ const MarkButton = ({ format, icon }) => {
         event.preventDefault()
         toggleMark(editor, format)
       }}
+      style={{ color: 'red' }}
     >
       <Icon>{icon}</Icon>
     </Button>

@@ -18,6 +18,7 @@ const PlainTextExample = () => {
         placeholder="Type something"
         renderPlaceholder={({ children, attributes }) => (
           <div {...attributes}>
+            {/* placeholder 放到此处 */}
             <p>{children}</p>
             <pre>
               Use the renderPlaceholder prop to customize rendering of the

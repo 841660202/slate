@@ -1,3 +1,4 @@
+// http://t-blog-images.aijs.top/img/202308200110309.webp
 import React, { useCallback, useMemo } from 'react'
 import { jsx } from 'slate-hyperscript'
 import { Transforms, createEditor, Descendant } from 'slate'
@@ -114,7 +115,7 @@ const withHtml = editor => {
 
   editor.insertData = data => {
     const html = data.getData('text/html')
-
+    // 插入html中的body片段
     if (html) {
       const parsed = new DOMParser().parseFromString(html, 'text/html')
       const fragment = deserialize(parsed.body)
